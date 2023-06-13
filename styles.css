@@ -31,3 +31,17 @@ align-items: center;
 padding: 30px 10%;
 }
 
+.book{
+  display: grid;
+  grid-template: auto 1fr;
+  padding: 10px;
+  border: 1px solid white;
+  margin-bottom: 10px;
+}
+.book img{
+  max-width: 100px;
+  max-height: 150px;
+}
+.book-title{
+  font-weight: bold;
+}
