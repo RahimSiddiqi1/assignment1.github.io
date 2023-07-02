@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Book Search Page</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f2f2f2;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      color: #333;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    #search-container {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    #search-box {
+      flex: 1;
+      height: 36px;
+      padding: 0 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+
+    #search-button {
+      height: 36px;
+      padding: 0 20px;
+      margin-left: 10px;
+      border: none;
+      background-color: #4CAF50;
+      color: white;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    #results-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .book-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 150px;
+      margin: 10px;
+      padding: 10px;
+      background-color: #fff;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    .book-item img {
+      width: 120px;
+      height: 180px;
+      margin-bottom: 10px;
+    }
+
+    .book-title {
+      font-size: 14px;
+      text-align: center;
+      margin-bottom: 5px;
+      color: #333;
+      text-decoration: none;
+    }
+
+    .page-select {
+      margin-top: 20px;
+      text-align: center;
+    }
+  </style>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script>
+    $(document).ready(function() {
+      $('#search-button').click(function() {
+        var searchTerm = $('#search-box').val();
+        searchBooks(searchTerm);
+      });
+    });
+
+    function searchBooks(searchTerm) {
+      var url = 'https://www.googleapis.com/books/v1/volumes?q=' + searchTerm;
+
+      $.get(url, function(data) {
+        displayResults(data.items);
+      });
+    }
+
+    function displayResults(books) {
+      var resultsContainer = $('#results-container');
+      resultsContainer.empty();
+
+      if (books.length === 0) {
+        resultsContainer.append('<p>No results found.</p>');
+        return;
+      }
+
+      var startIndex = 0;
+      var endIndex = Math.min(books.length, 60);
+
+      for (var i = startIndex; i < endIndex; i++) {
+        var book = books[i].volumeInfo;
+        var title = book.title;
+        var thumbnail = (book.imageLinks && book.imageLinks.smallThumbnail) ? book.imageLinks.smallThumbnail : 'no-image.png';
+        var bookId = books[i].id;
+
+        var bookItem = $('<div class="book-item"></div>');
+        var bookImage = $('<img src="' + thumbnail + '">');
+        var bookTitle = $('<a href="https://books.google.com/books?id=' + bookId + '" class="book-title">' + title + '</a>');
+
+        bookItem.append(bookImage);
+        bookItem.append(bookTitle);
+        resultsContainer.append(bookItem);
+      }
+
+      generatePageOptions(Math.ceil(books.length / 10));
+    }
+
+    function generatePageOptions(totalPages) {
+      var pageSelect = $('#page-number');
+      pageSelect.empty();
+
+      for (var pageNumber = 1; pageNumber <= totalPages; pageNumber++) {
+        var option = $('<option value="' + pageNumber + '">' + pageNumber + '</option>');
+        pageSelect.append(option);
+      }
+
+      pageSelect.on('change', function() {
+        var selectedPage = parseInt($(this).val());
+        showPage(selectedPage);
+      });
+
+      showPage(1);
+    }
+
+    function showPage(pageNumber) {
+      var startIndex = (pageNumber - 1) * 10;
+      var endIndex = startIndex + 10;
+      var bookItems = $('.book-item');
+      bookItems.hide().slice(startIndex, endIndex).show();
+    }
+  </script>
+</head>
+<body>
+  <h1>Book Search</h1>
+  <div id="search-container">
+    <input type="text" id="search-box" placeholder="Enter search terms" required>
+    <button type="submit" id="search-button">Search</button>
+  </div>
+  <div id="results-container"></div>
+  <div class="page-select">
+    <label for="page-number">Page:</label>
+    <select id="page-number"></select>
+  </div>
+</body>
+</html>

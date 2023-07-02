@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Bookshelf</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    header {
+      background-color: #333;
+      padding: 20px;
+      text-align: center;
+    }
+
+    h1 {
+      color: #fff;
+      margin: 0;
+    }
+
+    .book-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+      padding: 10px;
+      border: 1px solid #ccc;
+    }
+
+    .book-item img {
+      width: 60px;
+      height: 90px;
+      margin-right: 10px;
+    }
+
+    .book-item a {
+      text-decoration: none;
+      color: #333;
+    }
+  </style>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script>
+    $(document).ready(function() {
+      getBookshelfBooks();
+    });
+
+    function getBookshelfBooks() {
+      var bookshelfId = "your-bookshelf-id"; // Replace bookshelf ID
+
+      var url = 'https://www.googleapis.com/books/v1/users/me/bookshelves/' + bookshelfId + '/volumes';
+
+      $.get(url, function(data) {
+        displayBooks(data.items);
+      });
+    }
+
+    function displayBooks(books) {
+      var bookshelfContainer = $('#bookshelf-container');
+      bookshelfContainer.empty();
+
+      if (books.length === 0) {
+        bookshelfContainer.append('<p>No books in the bookshelf.</p>');
+        return;
+      }
+
+      for (var i = 0; i < books.length; i++) {
+        var book = books[i].volumeInfo;
+        var title = book.title;
+        var thumbnail = (book.imageLinks && book.imageLinks.smallThumbnail) ? book.imageLinks.smallThumbnail : 'no-image.png';
+        var bookId = books[i].id;
+
+        var bookItem = $('<div class="book-item"></div>');
+        var bookImage = $('<img src="' + thumbnail + '">');
+        var bookTitle = $('<a href="book-details.html?id=' + bookId + '">' + title + '</a>');
+
+        bookItem.append(bookImage);
+        bookItem.append(bookTitle);
+        bookshelfContainer.append(bookItem);
+      }
+    }
+  </script>
+</head>
+<body>
+  <header>
+    <h1>My Bookshelf</h1>
+  </header>
+  <div id="bookshelf-container"></div>
+</body>
+</html>
