@@ -2,91 +2,101 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Bookshelf</title>
+  <title>Bookshelf</title>
   <style>
     body {
       font-family: Arial, sans-serif;
       margin: 0;
-      padding: 0;
-    }
-
-    header {
-      background-color: #333;
       padding: 20px;
-      text-align: center;
+      background-color: #f8f8f8;
     }
 
     h1 {
-      color: #fff;
-      margin: 0;
+      text-align: center;
+      margin-bottom: 30px;
     }
 
-    .book-item {
+    .bookshelf {
       display: flex;
-      align-items: center;
-      margin-bottom: 10px;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+    }
+
+    .book {
+      width: 200px;
       padding: 10px;
-      border: 1px solid #ccc;
+      background-color: #fff;
+      border-radius: 4px;
+      text-align: center;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s, box-shadow 0.3s;
     }
 
-    .book-item img {
-      width: 60px;
-      height: 90px;
-      margin-right: 10px;
+    .book:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
 
-    .book-item a {
-      text-decoration: none;
+    .book img {
+      max-width: 100%;
+      border-radius: 4px;
+    }
+
+    .book h3 {
+      margin: 10px 0;
+      font-size: 16px;
       color: #333;
     }
+
+    .book a {
+      color: #555;
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+
+    .book a:hover {
+      color: #888;
+    }
   </style>
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-  <script>
-    $(document).ready(function() {
-      getBookshelfBooks();
-    });
-
-    function getBookshelfBooks() {
-      var bookshelfId = "your-bookshelf-id"; // Replace bookshelf ID
-
-      var url = 'https://www.googleapis.com/books/v1/users/me/bookshelves/' + bookshelfId + '/volumes';
-
-      $.get(url, function(data) {
-        displayBooks(data.items);
-      });
-    }
-
-    function displayBooks(books) {
-      var bookshelfContainer = $('#bookshelf-container');
-      bookshelfContainer.empty();
-
-      if (books.length === 0) {
-        bookshelfContainer.append('<p>No books in the bookshelf.</p>');
-        return;
-      }
-
-      for (var i = 0; i < books.length; i++) {
-        var book = books[i].volumeInfo;
-        var title = book.title;
-        var thumbnail = (book.imageLinks && book.imageLinks.smallThumbnail) ? book.imageLinks.smallThumbnail : 'no-image.png';
-        var bookId = books[i].id;
-
-        var bookItem = $('<div class="book-item"></div>');
-        var bookImage = $('<img src="' + thumbnail + '">');
-        var bookTitle = $('<a href="book-details.html?id=' + bookId + '">' + title + '</a>');
-
-        bookItem.append(bookImage);
-        bookItem.append(bookTitle);
-        bookshelfContainer.append(bookItem);
-      }
-    }
-  </script>
 </head>
 <body>
-  <header>
-    <h1>My Bookshelf</h1>
-  </header>
-  <div id="bookshelf-container"></div>
+  <h1>My Bookshelf</h1>
+
+  <div id="bookshelf" class="bookshelf"></div>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script>
+    // User ID and shelf ID
+    var userId = '117357581440219867770';
+    var shelfId = '0';
+
+    // Fetch books from the bookshelf
+    var apiUrl = 'https://www.googleapis.com/books/v1/users/' + userId + '/bookshelves/' + shelfId + '/volumes';
+
+    fetch(apiUrl)
+      .then(function(response) {
+        return response.json();
+      })
+      .then(function(data) {
+        var books = data.items;
+
+        var bookshelfElement = $('#bookshelf');
+
+        books.forEach(function(book) {
+          var bookElement = $('<div>').addClass('book');
+          var link = $('<a>').attr('href', book.volumeInfo.previewLink).attr('target', '_blank');
+          var thumbnail = $('<img>').attr('src', book.volumeInfo.imageLinks.thumbnail);
+          var title = $('<h3>').text(book.volumeInfo.title);
+
+          link.append(thumbnail);
+          bookElement.append(link, title);
+          bookshelfElement.append(bookElement);
+        });
+      })
+      .catch(function(error) {
+        console.log('Error fetching books:', error);
+      });
+  </script>
 </body>
 </html>

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Book Details</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .book-details {
+      display: flex;
+      align-items: flex-start;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+    }
+
+    .book-image {
+      flex: 0 0 200px;
+      margin-right: 20px;
+    }
+
+    .book-info {
+      flex: 1;
+    }
+
+    .book-info h2 {
+      margin-top: 0;
+      margin-bottom: 10px;
+      font-size: 24px;
+    }
+
+    .book-info p {
+      margin-bottom: 10px;
+      font-size: 16px;
+      line-height: 1.4;
+    }
+
+    .book-info a {
+      display: inline-block;
+      color: #2f80ed;
+      text-decoration: none;
+    }
+
+    .book-info a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <h1>Book Details</h1>
+  <div class="book-details" id="book-details">
+    <div class="book-image">
+      <img id="book-image" src="" alt="Book Cover">
+    </div>
+    <div class="book-info">
+      <h2 id="book-title"></h2>
+      <p id="book-authors"></p>
+      <p id="book-publisher"></p>
+      <p id="book-description"></p>
+      <p id="book-price"></p>
+      <p id="book-isbn"></p>
+      <p id="book-published-date"></p>
+      <p id="book-page-count"></p>
+      <p id="book-average-rating"></p>
+      <p id="book-categories"></p>
+      <p id="book-language"></p>
+      <p>
+        <a id="book-link" href="#" target="_blank">View on Google Books</a>
+      </p>
+    </div>
+  </div>
+
+  <script>
+    function stripTags(html) {
+      const tmp = document.createElement("div");
+      tmp.innerHTML = html;
+      return tmp.textContent || tmp.innerText || "";
+    }
+
+    // Fetch book details from Google Books API
+    const bookId = "J0KuzgEACAAJ";
+    const apiUrl = `https://www.googleapis.com/books/v1/volumes/${bookId}`;
+
+    fetch(apiUrl)
+      .then(response => response.json())
+      .then(data => {
+        const book = data.volumeInfo;
+
+        // Update the DOM with book details
+        document.getElementById("book-title").textContent = book.title;
+        document.getElementById("book-authors").textContent = `Author(s): ${book.authors.join(", ")}`;
+        document.getElementById("book-publisher").textContent = `Publisher: ${book.publisher}`;
+        document.getElementById("book-description").textContent = stripTags(book.description) || "No description available.";
+        document.getElementById("book-price").textContent = book.saleInfo?.listPrice?.amount
+          ? `Price: $${book.saleInfo.listPrice.amount}`
+          : "Price: Not available.";
+        document.getElementById("book-isbn").textContent = `ISBN: ${book.industryIdentifiers?.map(identifier => identifier.identifier).join(", ")}`;
+        document.getElementById("book-published-date").textContent = `Published Date: ${book.publishedDate}`;
+        document.getElementById("book-page-count").textContent = `Page Count: ${book.pageCount}`;
+        document.getElementById("book-average-rating").textContent = `Average Rating: ${book.averageRating || "Not available"}`;
+        document.getElementById("book-categories").textContent = `Categories: ${book.categories?.join(", ") || "Not available"}`;
+        document.getElementById("book-language").textContent = `Language: ${book.language || "Not available"}`;
+        document.getElementById("book-link").href = book.previewLink;
+
+        if (book.imageLinks?.thumbnail) {
+          document.getElementById("book-image").src = book.imageLinks.thumbnail;
+        } else {
+          document.getElementById("book-image").style.display = "none";
+        }
+      })
+      .catch(error => {
+        console.error("Error:", error);
+      });
+  </script>
+</body>
+</html>
