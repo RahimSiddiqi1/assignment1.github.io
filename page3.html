@@ -87,6 +87,27 @@
     #backBtn {
       margin-top: 10px;
     }
+
+    #bookshelf {
+      margin-top: 50px;
+    }
+
+    #bookshelf h2 {
+      margin-bottom: 10px;
+    }
+
+    #bookshelf .book {
+      display: inline-block;
+    }
+
+    #bookshelf .book img {
+      width: 100px;
+      height: 150px;
+    }
+
+    #bookshelf .book-title {
+      font-weight: bold;
+    }
   </style>
 </head>
 
@@ -119,10 +140,17 @@
     <button id="backBtn">Back to Search Results</button>
   </div>
 
+  <div id="bookshelf">
+    <h2>My Bookshelf</h2>
+    <div id="bookshelf-books"></div>
+  </div>
+
   <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
   <script>
     var searchTerms = "";
     var currentPage = 1;
+    var userId = "117357581440219867770";
+    var apiURL = "https://www.googleapis.com/books/v1/users/";
 
     function searchBooks() {
       var url = "https://www.googleapis.com/books/v1/volumes?q=" + searchTerms + "&startIndex=" + ((currentPage - 1) * 10) + "&maxResults=10";
@@ -201,7 +229,7 @@
         if (book.categories) {
           detailsHtml += "<p><strong>Categories:</strong> " + book.categories.join(", ") + "</p>";
         }
-
+        
         if (book.publisher) {
           detailsHtml += "<p><strong>Publisher:</strong> " + book.publisher + "</p>";
         }
@@ -232,6 +260,32 @@
       $("#results").show();
     }
 
+    function fetchBookshelf() {
+      var url = apiURL + userId + "/bookshelves/0/volumes";
+
+      $.getJSON(url, function (data) {
+        $("#bookshelf-books").empty();
+
+        if (data.totalItems === 0) {
+          $("#bookshelf-books").text("No books found in the bookshelf.");
+          return;
+        }
+
+        $.each(data.items, function (i, item) {
+          var book = item.volumeInfo;
+          var bookHtml = "<div class='book'><a href='#' onclick='showDetails(\"" + item.id + "\")'>";
+
+          if (book.imageLinks && book.imageLinks.thumbnail) {
+            bookHtml += "<img src='" + book.imageLinks.thumbnail + "' alt='Book Cover'>";
+          }
+
+          bookHtml += "<div class='book-title'>" + book.title + "</div></a></div>";
+
+          $("#bookshelf-books").append(bookHtml);
+        });
+      });
+    }
+
     $(document).ready(function () {
       $("#searchBtn").click(function () {
         searchTerms = $("#search").val();
@@ -251,6 +305,8 @@
       $(document).on("mouseleave", ".book img", function () {
         $(this).css("opacity", "1");
       });
+
+      fetchBookshelf();
     });
   </script>
 </body>
